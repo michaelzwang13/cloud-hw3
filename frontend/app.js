@@ -48,15 +48,6 @@
     }
   }
 
-  function fileToArrayBuffer(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = () => reject(reader.error);
-      reader.readAsArrayBuffer(file);
-    });
-  }
-
   searchForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const q = searchInput.value.trim();
@@ -90,23 +81,23 @@
       .filter(Boolean)
       .join(", ");
 
-    const params = {
-      key: file.name,
+    const headers = {
       "Content-Type": file.type || "image/jpeg",
-      "x-amz-meta-customLabels": customLabels,
+      "x-api-key": cfg.API_KEY || "",
     };
+    if (customLabels) headers["x-amz-meta-customLabels"] = customLabels;
 
     setStatus(uploadStatus, "Uploading…", "");
     try {
-      const body = await fileToArrayBuffer(file);
-      await apigClient.photosPut(params, body, {
-        headers: { "Content-Type": file.type || "image/jpeg" },
-      });
+      // Use fetch instead of the SDK for binary uploads — the SDK's
+      // utils.copy() drops ArrayBuffer contents and sends 0 bytes.
+      const url = `${cfg.API_BASE_URL.replace(/\/$/, "")}/photos?key=${encodeURIComponent(file.name)}`;
+      const resp = await fetch(url, { method: "PUT", headers, body: file });
+      if (!resp.ok) throw new Error(`Upload failed (${resp.status}): ${await resp.text()}`);
       setStatus(uploadStatus, `Uploaded "${file.name}".`, "ok");
       uploadForm.reset();
     } catch (err) {
-      const msg = err.response ? `Upload failed (${err.response.status}): ${JSON.stringify(err.response.data)}` : err.message;
-      setStatus(uploadStatus, msg, "error");
+      setStatus(uploadStatus, err.message, "error");
     }
   });
 })();
