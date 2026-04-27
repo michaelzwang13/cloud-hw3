@@ -1,0 +1,25 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 20
+    commands:
+      - cd lambdas
+      - npm ci --omit=dev
+
+  build:
+    commands:
+      - zip -rq lf1.zip lf1.js node_modules package.json package-lock.json
+      - zip -rq lf2.zip lf2.js node_modules package.json package-lock.json
+
+  post_build:
+    commands:
+      - aws lambda update-function-code --function-name photos-LF1 --zip-file fileb://lf1.zip --region us-east-1
+      - aws lambda update-function-code --function-name photos-LF2 --zip-file fileb://lf2.zip --region us-east-1
+
+artifacts:
+  files:
+    - lambdas/lf1.zip
+    - lambdas/lf2.zip
+  discard-paths: yes
