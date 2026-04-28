@@ -32,7 +32,7 @@ exports.handler = async (event) => {
 
     const rekResp = await rekognition.send(new DetectLabelsCommand({
       Image: { S3Object: { Bucket: bucket, Name: objectKey } },
-      MaxLabels: 10,
+      MaxLabels: 15,
       MinConfidence: 75,
     }));
     for (const l of rekResp.Labels || []) a1.push(l.Name);
