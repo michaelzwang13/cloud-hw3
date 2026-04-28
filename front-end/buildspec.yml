@@ -1,0 +1,10 @@
+version: 0.2
+
+phases:
+  build:
+    commands:
+      - aws s3 sync front-end/ s3://${FRONTEND_BUCKET}/ --delete --exclude "buildspec.yml"
+
+artifacts:
+  files:
+    - front-end/**/*

@@ -5,7 +5,7 @@ phases:
     runtime-versions:
       nodejs: 20
     commands:
-      - cd lambdas
+      - cd lambda-functions
       - npm ci --omit=dev
 
   build:
@@ -20,6 +20,6 @@ phases:
 
 artifacts:
   files:
-    - lambdas/lf1.zip
-    - lambdas/lf2.zip
+    - lambda-functions/lf1.zip
+    - lambda-functions/lf2.zip
   discard-paths: yes
